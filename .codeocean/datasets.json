@@ -2,6 +2,10 @@
 	"version": 1,
 	"attached_datasets": [
 		{
+			"id": "09db1ea9-a14d-41ac-bc36-ec535d594900",
+			"mount": "ecephys_AS20_2025-03-11_11-08-51"
+		},
+		{
 			"id": "42ee2286-92cf-4323-8c65-fe25ef8b1ed6",
 			"mount": "ecephys"
 		}
