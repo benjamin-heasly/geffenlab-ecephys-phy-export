@@ -4,16 +4,9 @@ from spikeinterface.exporters import export_to_phy
 # pattern to match block0_imec0
 # configureable /data
 
-# pattern to locate .json
-# pattern to locate bin_dir
-recording_json = "/data/ecephys/preprocessed/block0_imec0.ap_recording1.json"
-bin_dir = "/data/ecephys_1/ecephys/AS20_03112025_trainingSingle6Tone2024_Snk3.1_g0_imec0/"
-recording_preprocessed = si.load(recording_json, base_folder=bin_dir)
-print(recording_preprocessed)
-
 # pattern to locate .zarr
 postprocessed_dir = "/data/ecephys/postprocessed/block0_imec0.ap_recording1.zarr/"
-sorting_analyzer = si.load_sorting_analyzer(postprocessed_dir, recording=recording_preprocessed)
+sorting_analyzer = si.load_sorting_analyzer(postprocessed_dir)
 print(sorting_analyzer)
 
 # pattern to locate curated dir
@@ -26,6 +19,7 @@ for property_name in curated_properties:
 
 # configurable /results
 # results subdir like recording json?
+# option to compute_pc_features
 phy_dir = "/results/ecephys/phy/"
 export_to_phy(
   sorting_analyzer=sorting_analyzer,
