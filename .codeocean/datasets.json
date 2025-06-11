@@ -1,0 +1,9 @@
+{
+	"version": 1,
+	"attached_datasets": [
+		{
+			"id": "42ee2286-92cf-4323-8c65-fe25ef8b1ed6",
+			"mount": "ecephys"
+		}
+	]
+}
