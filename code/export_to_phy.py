@@ -21,7 +21,8 @@ def export_phy(
     # This includes sorting and quality metrics.
     # It will also find the original ap recording binary, if that data asset is present.
     logging.info(f"Looking for postprocessed/ dir matching: {postprocessed_pattern}")
-    postprocessed_path = list(data_path.glob(postprocessed_pattern))[0]
+    #postprocessed_path = list(data_path.glob(postprocessed_pattern))[0]
+    postprocessed_path = Path("/data/ecephys_AS20_2025-03-11_11-08-51_v2_sorted/postprocessed/block0_imec0.ap_recording1.zarr")
     logging.info(f"Loading postprocessed sorting data: {postprocessed_path}")
     sorting_analyzer = si.load_sorting_analyzer(postprocessed_path)
     logging.info(sorting_analyzer)

@@ -118,14 +118,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     )
 
     cli_args = parser.parse_args(argv)
-
     data_path = Path(cli_args.data_root)
-
-    print("DEBUGGING")
-    dood = Path("/data/ecephys_AS20_2025-03-11_11-08-51_v2_sorted/postprocessed/block0_imec0.ap_recording1.zarr")
-    for child in dood.iterdir():
-        print(child)
-
     results_path = Path(cli_args.results_root)
     try:
         capsule_main(
