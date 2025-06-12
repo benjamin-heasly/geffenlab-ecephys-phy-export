@@ -120,6 +120,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     cli_args = parser.parse_args(argv)
 
     data_path = Path(cli_args.data_root)
+
+    print("DEBUGGING")
+    for child in data_path.iterdir():
+        print(child)
+
     results_path = Path(cli_args.results_root)
     try:
         capsule_main(
