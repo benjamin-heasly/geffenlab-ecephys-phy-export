@@ -90,13 +90,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "--postprocessed-pattern", "-p",
         type=str,
         help="Glob pattern to locate postprocessed/ dir within DATA_ROOT. (default: %(default)s)",
-        default="**/postprocessed/block0_imec0.ap_recording1.zarr"
+        default="ecephys*/postprocessed/block0_imec0.ap_recording1.zarr"
     )
     parser.add_argument(
         "--curated-pattern", "-c",
         type=str,
         help="Glob pattern to locate curated/ dir within DATA_ROOT. (default: %(default)s)",
-        default="**/curated/block0_imec0.ap_recording1/"
+        default="ecephys*/curated/block0_imec0.ap_recording1/"
     )
     parser.add_argument(
         "--compute-pc-features", "-f",
