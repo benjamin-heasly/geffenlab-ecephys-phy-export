@@ -122,7 +122,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     data_path = Path(cli_args.data_root)
 
     print("DEBUGGING")
-    for child in data_path.iterdir():
+    dood = Path("/data/ecephys_AS20_2025-03-11_11-08-51_v2_sorted")
+    for child in dood.iterdir():
         print(child)
 
     results_path = Path(cli_args.results_root)
