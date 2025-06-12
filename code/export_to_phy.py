@@ -31,6 +31,8 @@ def export_phy(
     # This includes automatic cluster labeling based on qualtiy metrics.
     logging.info(f"Looking for curated/ dir matching: {curated_pattern}")
     curated_paths = list(data_path.glob(curated_pattern))
+    curated_path = [Path("/data/ecephys_AS20_2025-03-11_11-08-51_v2_sorted/curated/block0_imec0.ap_recording1")]
+    curated_properties = []
     if curated_paths:
         curated_path = curated_paths[0]
         logging.info(f"Loading auto-curating results: {curated_path}")
