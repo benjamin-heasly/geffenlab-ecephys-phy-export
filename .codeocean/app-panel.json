@@ -39,7 +39,7 @@
 			"description": "Glob pattern to locate postprocessed/ dir within DATA_ROOT",
 			"type": "text",
 			"value_type": "string",
-			"default_value": "**/postprocessed/block0_imec0.ap_recording1.zarr"
+			"default_value": "ecephys*/postprocessed/block0_imec0.ap_recording1.zarr"
 		},
 		{
 			"id": "UtWdRCRvjpCUa8MN",
@@ -48,7 +48,7 @@
 			"description": "Glob pattern to locate curated/ dir within DATA_ROOT",
 			"type": "text",
 			"value_type": "string",
-			"default_value": "**/curated/block0_imec0.ap_recording1/"
+			"default_value": "ecephys*/curated/block0_imec0.ap_recording1/"
 		},
 		{
 			"id": "5rct0zh2K44tI70w",
