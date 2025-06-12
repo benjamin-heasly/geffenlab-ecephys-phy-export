@@ -3,14 +3,14 @@
 	"named_parameters": true,
 	"datasets": [
 		{
-			"id": "42ee2286-92cf-4323-8c65-fe25ef8b1ed6",
-			"name": "Ecephys sorted",
-			"description": "Sorting results from AIND ecephys pipeline."
+			"id": "2429fd9e-80c5-4cf0-a281-9c8043cfc402",
+			"name": "rig asset",
+			"description": "Raw ecephys data from a rig"
 		},
 		{
-			"id": "09db1ea9-a14d-41ac-bc36-ec535d594900",
-			"name": "Raw ecephys data",
-			"description": "Raw data input to AIND ecephys pipeline, with original ap recording binary "
+			"id": "7603f7a9-14d8-4274-9d63-e39a58c31413",
+			"name": "sorted asset",
+			"description": "Sorting output from aind-ephys-pipeline"
 		}
 	],
 	"parameters": [

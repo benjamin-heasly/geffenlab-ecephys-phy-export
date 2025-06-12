@@ -2,12 +2,12 @@
 	"version": 1,
 	"attached_datasets": [
 		{
-			"id": "09db1ea9-a14d-41ac-bc36-ec535d594900",
-			"mount": "ecephys_AS20_2025-03-11_11-08-51"
+			"id": "2429fd9e-80c5-4cf0-a281-9c8043cfc402",
+			"mount": "ecephys"
 		},
 		{
-			"id": "42ee2286-92cf-4323-8c65-fe25ef8b1ed6",
-			"mount": "ecephys"
+			"id": "7603f7a9-14d8-4274-9d63-e39a58c31413",
+			"mount": "ecephys_AS20_2025-03-11_11-08-51_v2_sorted"
 		}
 	]
 }
