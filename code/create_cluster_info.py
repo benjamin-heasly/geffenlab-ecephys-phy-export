@@ -17,7 +17,7 @@ def create_cluster_info(
     It will generate a cluster_info.tsv similar to what you'd get if you
         - open template-gui
         - save (ctrl-s)
-        - exited right away
+        - exit right away
 
     This seems pointless, but Phy creates a useful file called cluster_info.tsv as a side-effect.
     This script creates a similar cluster_info.tsv with columns including:
