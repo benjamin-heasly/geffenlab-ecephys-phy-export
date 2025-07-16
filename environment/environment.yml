@@ -1,0 +1,12 @@
+name: ephys-phy-export
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.12
+  - pip=24.0
+  - pip:
+    - numpy==2.2.6
+    - phylib==2.6.0
+    - scikit-learn==1.6.1
+    - spikeinterface[full]==0.102.1

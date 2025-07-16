@@ -1,15 +1,24 @@
-# hash:sha256:f4f6610f87ff3b50110dbac7a0163bfc4e65955961805e86a7833c451892f813
-ARG REGISTRY_HOST
-FROM $REGISTRY_HOST/codeocean/mambaforge3:24.5.0-0-python3.12.4-ubuntu22.04
+# This runs in an Ubuntu environment.
+FROM ubuntu:22.04
 
-ARG DEBIAN_FRONTEND=noninteractive
+# Install wget and https certificate info, which we'll use to install things, below.
+# Clean up cache and temp files along the way.
+RUN export DEBIAN_FRONTEND=noninteractive \
+    && apt update \
+    && apt install --no-install-recommends --yes wget ca-certificates \
+    && apt-get clean \
+    && apt-get autoremove \
+    && rm -rf /var/lib/apt/lists/*
 
-ARG GIT_ASKPASS
-ARG GIT_ACCESS_TOKEN
-COPY git-askpass /
+# Install conda.
+RUN mkdir -p /opt/conda
+RUN wget https://repo.anaconda.com/miniconda/Miniconda3-py311_24.5.0-0-Linux-x86_64.sh -O /opt/conda/miniconda.sh \
+    && bash /opt/conda/miniconda.sh -b -p /opt/miniconda
 
-RUN pip install -U --no-cache-dir \
-    numpy==2.2.6 \
-    phylib==2.6.0 \
-    scikit-learn==1.6.1 \
-    spikeinterface[full]==0.102.1
+# Create our conda environment from environment.yml.
+COPY environment/environment.yml /opt/environment/environment.yml
+RUN /opt/miniconda/bin/conda env create -f /opt/environment/environment.yml
+
+# When the container runs, execute our run.py and pass along arguments to it.
+COPY code /opt/code
+ENTRYPOINT ["/opt/miniconda/bin/conda", "run", "--no-capture-output", "-n", "ephys-phy-export", "python", "-u", "/opt/code/run.py"]
