@@ -19,6 +19,5 @@ RUN wget https://repo.anaconda.com/miniconda/Miniconda3-py311_24.5.0-0-Linux-x86
 COPY environment/environment.yml /opt/environment/environment.yml
 RUN /opt/miniconda/bin/conda env create -f /opt/environment/environment.yml
 
-# When the container runs, execute our run.py and pass along arguments to it.
+# Include all of our code/* in /opt/code
 COPY code /opt/code
-ENTRYPOINT ["/opt/miniconda/bin/conda", "run", "--no-capture-output", "-n", "ephys-phy-export", "python", "-u", "/opt/code/run.py"]
