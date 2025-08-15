@@ -1,16 +1,46 @@
 # geffenlab-ecephys-phy-export
 
-This capsule reads results from the [aind-ephys-pipeline (kilosort4)](https://codeocean.allenneuraldynamics.org/capsule/9352933/tree) pipeline and exports data for use with [Phy](https://github.com/cortex-lab/phy).
+Reads results from the [aind-ephys-pipeline](https://github.com/AllenNeuralDynamics/aind-ephys-pipeline) and export data for use with [Phy](https://github.com/cortex-lab/phy) and downstream analysis.
 
-# data
+# Building Docker image versions
 
-The aind-ephys-pipeline `postprocessed/` data are required, as in [ecephys_AS20_2025-03-11_11-08-51_v2_sorted
-](https://codeocean.allenneuraldynamics.org/data-assets/42ee2286-92cf-4323-8c65-fe25ef8b1ed6/ecephys?filters=N4Igzg9gTgLiBcIDGUCmBDGqAmIA0I2qYSCMUArqgQA7oDmqCAjLalAAoNPwBMADAXTYAbugB2SHAmABfAgFsKAGxgBLAGJrV7MDJDokUsGAAyqEamV74AbWRpM0gLqzZQA).  The data asset should be attached to the capsule at `/data`.
+This repo is configured to automatically build and publish a new Docker image version, each time a [repo tag](https://git-scm.com/book/en/v2/Git-Basics-Tagging) is pushed to GitHub.
 
-The raw session data assed (the same used as input to aind-ephys-pipeline) is optional, as in [ecephys_AS20_2025-03-11_11-08-51_v2
-](https://codeocean.allenneuraldynamics.org/data-assets/2429fd9e-80c5-4cf0-a281-9c8043cfc402/ecephys?filters=N4Igzg9gTgLiBcIDGUCmBDGqAmIA0I2qYSCMUArqgQA7oDmqCAjLalAAoNPwBMADAXTYAbugB2SHAmABfAgFsKAGxgBLAGJrV7MDJDokUsGAAyqEamV74AbWRpM0gLqzZQA).  If this asset is also attached to the capsule at `/data` then the capsule can optionally export:
+## Published versions
 
- - PC features to support the Phy feature view (use `--compute-pc-features True`)
- - a filtered copy of the original ap recording binary (use `--copy-binary True`)
+The published images are located in the GitHub Container Registry as [geffenlab-ecephys-phy-export](https://github.com/benjamin-heasly/geffenlab-ecephys-phy-export/pkgs/container/geffenlab-ecephys-phy-export).  You can find the latest published version at this page.
 
-PC features and copy binary are optional.
+You can access published images using their full names.  For version `v0.0.4` the full name would be `ghcr.io/benjamin-heasly/geffenlab-ecephys-phy-export:v0.0.4`.  You can use this name in [Nexflow pipeline configuration](https://github.com/benjamin-heasly/geffenlab-ephys-pipeline/blob/master/pipeline/main.nf#L37) and with Docker commands like:
+
+```
+docker pull ghcr.io/benjamin-heasly/geffenlab-ecephys-phy-export:v0.0.4
+```
+
+## Releasing new versions
+
+Here's a workflow for building and realeasing a new Docker image version.
+
+First, make changes to the code in this repo, and `push` the changes to GitHub.
+
+```
+# Edit code
+git commit -a -m "Now with lasers!"
+git push
+```
+
+Next, Create a new repository [tag](https://git-scm.com/book/en/v2/Git-Basics-Tagging), which marks the most recent commit as important, giving it a unique name and description.
+
+```
+# Review existing tags and choose the next version number to use.
+git pull --tags
+git tag -l
+
+# Create the tag for the next version
+git tag -a v0.0.5 -m "Now with lasers!"
+git push --tags
+```
+
+GitHub should automatically kick off a build and publish workflow for the new tag.
+You can follow the workflow progress at the repo's [Actions](https://github.com/benjamin-heasly/geffenlab-ecephys-phy-export/actions) page.
+
+You can see the workflow code in [build-tag.yml](./.github/workflows/build-tag.yml).
