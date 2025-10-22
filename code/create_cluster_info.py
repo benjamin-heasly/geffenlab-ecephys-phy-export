@@ -79,8 +79,16 @@ def create_cluster_info(
     #   https://github.com/cortex-lab/phylib/blob/master/phylib/io/model.py#L897
     def best_channel_for_cluster(cluster_id):
         template_id = get_template_for_cluster(cluster_id)
-        template = model.get_template(template_id)
-        return template.channel_ids[0]
+        sparse_template_data = model.sparse_templates.data[template_id]
+        if sparse_template_data.max() > sparse_template_data.min():
+            # Choose the channel with the highest amplitude.
+            template = model.get_template(template_id)
+            best_channel = template.channel_ids[0]
+            print(f"Chose best (hightest amplitude) channel {best_channel} for cluster {cluster_id} / template {template_id}.")
+            return best_channel
+        else:
+            # No real template for this cluster, fall back to zero.
+            logging.warning(f"No template data for cluster {cluster_id} / template {template_id}, defaulting to ch 0.")
 
     # Based on functions and notes above, pick the "best" channel for each cluster, AKA "ch".
     best_channels = [best_channel_for_cluster(cluster_id) for cluster_id in model.cluster_ids]
