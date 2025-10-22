@@ -89,6 +89,7 @@ def create_cluster_info(
         else:
             # No real template for this cluster, fall back to zero.
             logging.warning(f"No template data for cluster {cluster_id} / template {template_id}, defaulting to ch 0.")
+            return 0
 
     # Based on functions and notes above, pick the "best" channel for each cluster, AKA "ch".
     best_channels = [best_channel_for_cluster(cluster_id) for cluster_id in model.cluster_ids]
