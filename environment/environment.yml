@@ -9,4 +9,4 @@ dependencies:
     - numpy==2.2.6
     - phylib==2.6.0
     - scikit-learn==1.6.1
-    - spikeinterface[full]==0.102.1
+    - spikeinterface[full]==0.103.0
