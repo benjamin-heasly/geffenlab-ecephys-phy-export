@@ -25,23 +25,40 @@ def capsule_main(
     copy_binary: bool,
     n_jobs: int
 ):
-
     logging.info("Exporting ecephys sorting results to Phy.\n")
-    phy_path = export_phy(
-        data_path=data_path,
-        results_path=results_path,
-        postprocessed_pattern=postprocessed_pattern,
-        curated_pattern=curated_pattern,
-        compute_pc_features=compute_pc_features,
-        copy_binary=copy_binary,
-        n_jobs=n_jobs
-    )
-    logging.info("OK\n")
+    logging.info(f"Looking for data in: {data_path}")
 
-    logging.info("Creating initial Phy cluster_info.tsv.\n")
-    params_py = Path(phy_path, "params.py")
-    create_cluster_info(params_py)
-    logging.info("OK\n")
+    logging.info(f"Looking for postprocessed/ dir(s) matching: {postprocessed_pattern}")
+    postprocessed_paths = list(data_path.glob(postprocessed_pattern))
+    postprocessed_count = len(postprocessed_paths)
+    logging.info(f"Found {postprocessed_count} postprocessed data paths: {postprocessed_paths}")
+
+    logging.info(f"Looking for curated/ dir(s) matching: {curated_pattern}")
+    curated_paths = list(data_path.glob(curated_pattern))
+    curated_count = len(curated_paths)
+    logging.info(f"Found {curated_count} curated data paths: {curated_paths}")
+
+    if postprocessed_count != curated_count:
+        raise ValueError(f"Number of postprocessed/ dirs {postprocessed_count} must match number of curated/ dirs {curated_count}.")
+
+    for postprocessed_path, curated_path in zip(postprocessed_paths, curated_paths):
+        logging.info("Exporting to Phy.")
+        logging.info(f"Posprocessed: {postprocessed_path}")
+        logging.info(f"Curated: {curated_path}")
+        phy_path = export_phy(
+            results_path=results_path,
+            postprocessed_path=postprocessed_path,
+            curated_path=curated_path,
+            compute_pc_features=compute_pc_features,
+            copy_binary=copy_binary,
+            n_jobs=n_jobs
+        )
+        logging.info("OK\n")
+
+        logging.info("Creating initial Phy cluster_info.tsv.\n")
+        params_py = Path(phy_path, "params.py")
+        create_cluster_info(params_py)
+        logging.info("OK\n")
 
 
 def truthy_str(str_value: str) -> bool:
@@ -89,14 +106,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser.add_argument(
         "--postprocessed-pattern", "-p",
         type=str,
-        help="Glob pattern to locate postprocessed/ dir within DATA_ROOT. (default: %(default)s)",
-        default="*/postprocessed/block0_imec0.ap_recording1.zarr"
+        help="Glob pattern to locate postprocessed/ dirs within DATA_ROOT. (default: %(default)s)",
+        default="*/postprocessed/*.zarr"
     )
     parser.add_argument(
         "--curated-pattern", "-c",
         type=str,
-        help="Glob pattern to locate curated/ dir within DATA_ROOT. (default: %(default)s)",
-        default="*/curated/block0_imec0.ap_recording1/"
+        help="Glob pattern to locate curated/ dirs within DATA_ROOT. (default: %(default)s)",
+        default="*/curated/*/"
     )
     parser.add_argument(
         "--compute-pc-features", "-f",
