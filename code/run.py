@@ -1,6 +1,6 @@
 import sys
 from argparse import ArgumentParser
-from typing import Optional, Sequence, Any
+from typing import Optional, Sequence
 import logging
 from pathlib import Path
 
@@ -31,11 +31,13 @@ def capsule_main(
     logging.info(f"Looking for postprocessed/ dir(s) matching: {postprocessed_pattern}")
     postprocessed_paths = list(data_path.glob(postprocessed_pattern))
     postprocessed_count = len(postprocessed_paths)
+    postprocessed_paths.sort()
     logging.info(f"Found {postprocessed_count} postprocessed data paths: {postprocessed_paths}")
 
     logging.info(f"Looking for curated/ dir(s) matching: {curated_pattern}")
     curated_paths = list(data_path.glob(curated_pattern))
     curated_count = len(curated_paths)
+    curated_paths.sort()
     logging.info(f"Found {curated_count} curated data paths: {curated_paths}")
 
     if postprocessed_count != curated_count:
