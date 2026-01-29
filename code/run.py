@@ -16,43 +16,106 @@ def set_up_logging():
     )
 
 
+def first_match(
+    pattern: str,
+    candidates: list[str]
+) -> str:
+    for candidate in candidates:
+        if pattern in str(candidate):
+            return candidate
+    return None
+
+
 def capsule_main(
-    data_path: Path,
-    results_path: Path,
+    processed_data_path: Path,
+    preprocessed_pattern: str,
     postprocessed_pattern: str,
     curated_pattern: str,
+    ecephys_path: Path,
+    ecephys_probe_delimiter: str,
+    ecephys_probe_names: list[str],
+    results_path: Path,
     compute_pc_features: bool,
     copy_binary: bool,
+    export_sparse: bool,
     n_jobs: int
 ):
-    logging.info("Exporting ecephys sorting results to Phy.\n")
-    logging.info(f"Looking for data in: {data_path}")
+    logging.info(f"Exporting sorting results to Phy at: {results_path}.")
+    logging.info(f"Searching for processed data from: {processed_data_path}.")
+    logging.info(f"Searching for raw ecephys data from: {ecephys_path}.")
 
-    logging.info(f"Looking for postprocessed/ dir(s) matching: {postprocessed_pattern}")
-    postprocessed_paths = list(data_path.glob(postprocessed_pattern))
+    # Locate SpikeInterface preprocessed, postprocessed, and curated results.
+    logging.info(f"Looking for preprocessed/ paths(s) matching: {preprocessed_pattern}")
+    preprocessed_paths = list(processed_data_path.glob(preprocessed_pattern))
+    preprocessed_count = len(preprocessed_paths)
+    logging.info(f"Found {preprocessed_count} preprocessed data paths: {preprocessed_paths}")
+
+    logging.info(f"Looking for postprocessed/ paths(s) matching: {postprocessed_pattern}")
+    postprocessed_paths = list(processed_data_path.glob(postprocessed_pattern))
     postprocessed_count = len(postprocessed_paths)
-    postprocessed_paths.sort()
     logging.info(f"Found {postprocessed_count} postprocessed data paths: {postprocessed_paths}")
 
-    logging.info(f"Looking for curated/ dir(s) matching: {curated_pattern}")
-    curated_paths = list(data_path.glob(curated_pattern))
+    logging.info(f"Looking for curated/ paths(s) matching: {curated_pattern}")
+    curated_paths = list(processed_data_path.glob(curated_pattern))
     curated_count = len(curated_paths)
-    curated_paths.sort()
     logging.info(f"Found {curated_count} curated data paths: {curated_paths}")
 
-    if postprocessed_count != curated_count:
-        raise ValueError(f"Number of postprocessed/ dirs {postprocessed_count} must match number of curated/ dirs {curated_count}.")
+    # Locate ecephys probe subdirs.
+    logging.info(f"Searching for probe path(s) within: {ecephys_path}")
+    probe_paths = [subdir for subdir in ecephys_path.iterdir() if subdir.is_dir()]
+    probe_count = len(probe_paths)
+    logging.info(f"Found {probe_count} probe paths: {probe_paths}")
 
-    for postprocessed_path, curated_path in zip(postprocessed_paths, curated_paths):
+    # Decide which probes to convert.
+    if ecephys_probe_names:
+        logging.info(f"Using the given probe names: {ecephys_probe_names}")
+    else:
+        ecephys_probe_names = [subdir.name.split(ecephys_probe_delimiter)[-1] for subdir in probe_paths]
+        logging.info(f"Found probe names: {ecephys_probe_names}")
+
+    # Convert each probe, combining raw ecephys data and SpikeInterface processing results.
+    for probe_name in ecephys_probe_names:
+        logging.info(f"Exporting probe: {probe_name}")
+
+        probe_path = first_match(probe_name, probe_paths)
+        if not probe_path:
+            logging.warning(f"Skipping probe {probe_name}, no matching prove path found.")
+            continue
+
+        probe_path = first_match(probe_name, probe_paths)
+        if not probe_path:
+            logging.warning(f"Skipping probe {probe_name}, no matching prove path found.")
+            continue
+
+        preprocessed_path = first_match(probe_name, preprocessed_paths)
+        if not preprocessed_path:
+            logging.warning(f"Skipping probe {probe_name}, no matching preprocessed path found.")
+            continue
+
+        postprocessed_path = first_match(probe_name, postprocessed_paths)
+        if not postprocessed_path:
+            logging.warning(f"Skipping probe {probe_name}, no matching postprocessed path found.")
+            continue
+
+        curated_path = first_match(probe_name, curated_paths)
+        if not curated_path:
+            logging.warning(f"Skipping probe {probe_name}, no matching curated path found.")
+            continue
+
         logging.info("Exporting to Phy.")
+        logging.info(f"Probe: {probe_path}")
+        logging.info(f"Preprocessed: {preprocessed_path}")
         logging.info(f"Posprocessed: {postprocessed_path}")
         logging.info(f"Curated: {curated_path}")
         phy_path = export_phy(
             results_path=results_path,
+            probe_path=probe_path,
+            preprocessed_path=preprocessed_path,
             postprocessed_path=postprocessed_path,
             curated_path=curated_path,
             compute_pc_features=compute_pc_features,
             copy_binary=copy_binary,
+            export_sparse=export_sparse,
             n_jobs=n_jobs
         )
         logging.info("OK\n")
@@ -61,6 +124,7 @@ def capsule_main(
         params_py = Path(phy_path, "params.py")
         create_cluster_info(params_py)
         logging.info("OK\n")
+
 
 
 def truthy_str(str_value: str) -> bool:
@@ -94,39 +158,70 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = ArgumentParser(description="Export ecephys sorting resluts to Phy.")
 
     parser.add_argument(
-        "--data-root", "-d",
+        "--processed-data-dir", "-P",
         type=str,
-        help="Where to find and read input data files. (default: %(default)s)",
-        default="/data"
+        help="Where to search for SpikeInterface preprocessed, postprocesed, and curated results. (default: %(default)s)",
+        default="/processed_data"
     )
     parser.add_argument(
-        "--results-root", "-r",
+        "--preprocessed-pattern", "-p",
+        type=str,
+        help="Glob pattern to locate preprocessed/ dirs within PROCESSED_DATA_DIR. (default: %(default)s)",
+        default="*/*/preprocessed/*.json"
+    )
+    parser.add_argument(
+        "--postprocessed-pattern", "-t",
+        type=str,
+        help="Glob pattern to locate postprocessed/ dirs within PROCESSED_DATA_DIR. (default: %(default)s)",
+        default="*/*/postprocessed/*.zarr"
+    )
+    parser.add_argument(
+        "--curated-pattern", "-c",
+        type=str,
+        help="Glob pattern to locate curated/ dirs within PROCESSED_DATA_DIR. (default: %(default)s)",
+        default="*/*/curated/*/"
+    )
+    parser.add_argument(
+        "--ecephys-dir", "-E",
+        type=str,
+        help="Where to search for raw ecephys probes and recordings. (default: %(default)s)",
+        default="/ecephys"
+    )
+    parser.add_argument(
+        "--ecephys-probe-delimiter", "-d",
+        type=str,
+        help="Delimiter for parsing ecephys probe subdirectores with names ending like _imec0 or _imec1. (default: %(default)s)",
+        default="_"
+    )
+    parser.add_argument(
+        "--ecephys-probe-names", "-N",
+        type=str,
+        nargs="*",
+        help="List of probe namese to look for, for example 'imec0, imec1'.  Omit to search subdirs of ECEPHYS_DIR and parse with ECEPHYS_PROBE_DELIMITER (default: %(default)s)",
+        default=None
+    )
+    parser.add_argument(
+        "--results-dir", "-r",
         type=str,
         help="Where to write output result files. (default: %(default)s)",
         default="/results"
     )
     parser.add_argument(
-        "--postprocessed-pattern", "-p",
-        type=str,
-        help="Glob pattern to locate postprocessed/ dirs within DATA_ROOT. (default: %(default)s)",
-        default="*/postprocessed/*.zarr"
-    )
-    parser.add_argument(
-        "--curated-pattern", "-c",
-        type=str,
-        help="Glob pattern to locate curated/ dirs within DATA_ROOT. (default: %(default)s)",
-        default="*/curated/*/"
-    )
-    parser.add_argument(
         "--compute-pc-features", "-f",
         type=truthy_str,
-        help="True or False, whether to compute pc features for the Phy feature view -- requires the original ap recording binary to be found in DATA_ROOT. (default: %(default)s)",
-        default=False
+        help="True or False, whether to compute and export pc features. (default: %(default)s)",
+        default=True
     )
     parser.add_argument(
         "--copy-binary", "-b",
         type=truthy_str,
-        help="True or False, whether to write a filtered copy of the ap recording binary into the Phy dir as recording.dat -- requires the original ap recording binary to be found in DATA_ROOT. (default: %(default)s)",
+        help="True or False, whether to write a filtered copy of the ap recording binary into the Phy dir as recording.dat. (default: %(default)s)",
+        default=False
+    )
+    parser.add_argument(
+        "--export-sparse", "-S",
+        type=truthy_str,
+        help="True or False, whether to export sparse templates (True), or dense (False). (default: %(default)s)",
         default=False
     )
     parser.add_argument(
@@ -137,17 +232,23 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     )
 
     cli_args = parser.parse_args(argv)
-    data_path = Path(cli_args.data_root)
-    results_path = Path(cli_args.results_root)
+    processed_data_path = Path(cli_args.processed_data_dir)
+    ecephys_path = Path(cli_args.ecephys_dir)
+    results_path = Path(cli_args.results_dir)
     try:
         capsule_main(
-            data_path=data_path,
-            results_path=results_path,
-            postprocessed_pattern=cli_args.postprocessed_pattern,
-            curated_pattern=cli_args.curated_pattern,
-            compute_pc_features=cli_args.compute_pc_features,
-            copy_binary=cli_args.copy_binary,
-            n_jobs=cli_args.n_jobs
+            processed_data_path,
+            cli_args.preprocessed_pattern,
+            cli_args.postprocessed_pattern,
+            cli_args.curated_pattern,
+            ecephys_path,
+            cli_args.ecephys_probe_delimiter,
+            cli_args.ecephys_probe_names,
+            results_path,
+            cli_args.compute_pc_features,
+            cli_args.copy_binary,
+            cli_args.export_sparse,
+            cli_args.n_jobs,
         )
     except:
         logging.error("Error exporting to Phy.", exc_info=True)
