@@ -27,7 +27,6 @@ def export_phy(
     curated_path: Path,
     compute_pc_features: bool,
     copy_binary: bool,
-    export_sparse: bool,
     n_jobs: int
 ) -> Path:
     """Export ecephys sorting results from SpikeInterface to Phy."""
@@ -79,13 +78,6 @@ def export_phy(
         logging.info(f"Adding cluster property: {property_name}")
         property_values = sorting_curated.get_property(property_name)
         sorting_analyzer.set_sorting_property(property_name, property_values)
-
-    # Decide whether to export templates in sparse or dense format.
-    # Phy can use either.
-    # Bombcell requires dense.
-    if not export_sparse:
-        logging.info(f"Configuring SpikeInterface to write templates as dense, not sparse.")
-        sorting_analyzer.sparsity = None
 
     # Export all of the above to Phy format.
     phy_path = Path(results_path, "phy", postprocessed_path.stem)

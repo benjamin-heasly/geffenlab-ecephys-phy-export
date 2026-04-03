@@ -37,7 +37,6 @@ def capsule_main(
     results_path: Path,
     compute_pc_features: bool,
     copy_binary: bool,
-    export_sparse: bool,
     n_jobs: int
 ):
     logging.info(f"Exporting sorting results to Phy at: {results_path}.")
@@ -115,7 +114,6 @@ def capsule_main(
             curated_path=curated_path,
             compute_pc_features=compute_pc_features,
             copy_binary=copy_binary,
-            export_sparse=export_sparse,
             n_jobs=n_jobs
         )
         logging.info("OK\n")
@@ -219,12 +217,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         default=False
     )
     parser.add_argument(
-        "--export-sparse", "-S",
-        type=truthy_str,
-        help="True or False, whether to export sparse templates (True), or dense (False). (default: %(default)s)",
-        default=False
-    )
-    parser.add_argument(
         "--n-jobs", "-n",
         type=int,
         help="Number of jobs to use for parallel processing -- -1 means one job per CPU core. (default: %(default)s)",
@@ -247,7 +239,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             results_path,
             cli_args.compute_pc_features,
             cli_args.copy_binary,
-            cli_args.export_sparse,
             cli_args.n_jobs,
         )
     except:
