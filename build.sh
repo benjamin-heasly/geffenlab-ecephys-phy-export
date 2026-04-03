@@ -14,4 +14,4 @@ docker run --rm \
   --processed-data-dir /home/ninjaben/codin/geffen-lab-data/processed_data/BH/AS20-minimal3/03112025 \
   --ecephys-dir /home/ninjaben/codin/geffen-lab-data/raw_data/BH/AS20-minimal3/03112025/ecephys/AS20_03112025_trainingSingle6Tone2024_Snk3.1_g0 \
   --results-dir $PWD/results \
-  --compute-pc-features false
+  --n-jobs "10"

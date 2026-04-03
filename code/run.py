@@ -35,7 +35,10 @@ def capsule_main(
     ecephys_probe_delimiter: str,
     ecephys_probe_names: list[str],
     results_path: Path,
+    sparsity_radius_um: float,
     compute_pc_features: bool,
+    pc_n_components: int,
+    pc_mode: str,
     copy_binary: bool,
     n_jobs: int
 ):
@@ -112,7 +115,10 @@ def capsule_main(
             preprocessed_path=preprocessed_path,
             postprocessed_path=postprocessed_path,
             curated_path=curated_path,
+            sparsity_radius_um=sparsity_radius_um,
             compute_pc_features=compute_pc_features,
+            pc_n_components=pc_n_components,
+            pc_mode=pc_mode,
             copy_binary=copy_binary,
             n_jobs=n_jobs
         )
@@ -122,7 +128,6 @@ def capsule_main(
         params_py = Path(phy_path, "params.py")
         create_cluster_info(params_py)
         logging.info("OK\n")
-
 
 
 def truthy_str(str_value: str) -> bool:
@@ -205,10 +210,29 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         default="/results"
     )
     parser.add_argument(
+        "--sparsity-radius-um",
+        type=float,
+        help="Radius in microns for computing sparsity (channel relevance) for exported waveforms, PC features. (default: %(default)s)",
+        default=40
+    )
+    parser.add_argument(
         "--compute-pc-features", "-f",
         type=truthy_str,
         help="True or False, whether to compute and export pc features. (default: %(default)s)",
         default=True
+    )
+    parser.add_argument(
+        "--pc-n-components",
+        type=int,
+        help="How many PC components to fit. (default: %(default)s)",
+        default=3
+    )
+    parser.add_argument(
+        "--pc-mode",
+        type=str,
+        choices=("by_channel_local", "by_channel_global", "concatenated"),
+        help="SpikeInterface PC fit mode. (default: %(default)s)",
+        default="by_channel_local"
     )
     parser.add_argument(
         "--copy-binary", "-b",
@@ -237,7 +261,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             cli_args.ecephys_probe_delimiter,
             cli_args.ecephys_probe_names,
             results_path,
+            cli_args.sparsity_radius_um,
             cli_args.compute_pc_features,
+            cli_args.pc_n_components,
+            cli_args.pc_mode,
             cli_args.copy_binary,
             cli_args.n_jobs,
         )

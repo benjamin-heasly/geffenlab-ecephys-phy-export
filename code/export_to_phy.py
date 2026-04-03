@@ -7,6 +7,7 @@ from contextlib import chdir
 import numpy as np
 import spikeinterface as si
 from spikeinterface.exporters import export_to_phy
+from spikeinterface.core import compute_sparsity
 
 
 def find_deepest_recording(recording_dict: dict):
@@ -25,7 +26,10 @@ def export_phy(
     preprocessed_path: Path,
     postprocessed_path: Path,
     curated_path: Path,
+    sparsity_radius_um: float,
     compute_pc_features: bool,
+    pc_n_components: int,
+    pc_mode: str,
     copy_binary: bool,
     n_jobs: int
 ) -> Path:
@@ -73,16 +77,29 @@ def export_phy(
     sorting_curated = si.load(curated_path)
     logging.info(sorting_curated)
 
+    logging.info(f"Computing sparstiy with radius {sparsity_radius_um} microns.")
+    new_sparsity = compute_sparsity(sorting_analyzer, method="radius", radius_um=sparsity_radius_um)
+    sorting_analyzer.sparsity = new_sparsity
+
     curated_properties = sorting_curated.get_property_keys()
     for property_name in curated_properties:
         logging.info(f"Adding cluster property: {property_name}")
         property_values = sorting_curated.get_property(property_name)
         sorting_analyzer.set_sorting_property(property_name, property_values)
 
+    logging.info(f"compute_pc_features {compute_pc_features}")
+    if compute_pc_features:
+        logging.info(f"PC features with n_components {pc_n_components}, mode {pc_mode}")
+        sorting_analyzer.compute(
+            "principal_components",
+            n_components=pc_n_components,
+            mode=pc_mode,
+            n_jobs=n_jobs
+        )
+
     # Export all of the above to Phy format.
     phy_path = Path(results_path, "phy", postprocessed_path.stem)
     logging.info(f"Exporting to Phy: {phy_path}")
-    logging.info(f"compute_pc_features {compute_pc_features}")
     logging.info(f"copy_binary {copy_binary}")
     with chdir(probe_path):
         export_to_phy(
@@ -90,7 +107,6 @@ def export_phy(
             output_folder=phy_path,
             additional_properties=curated_properties,
             remove_if_exists=True,
-            compute_pc_features=compute_pc_features,
             copy_binary=copy_binary,
             n_jobs=n_jobs
         )
